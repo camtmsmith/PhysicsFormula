@@ -28,17 +28,18 @@
   .math .up,.math .txt{font-style:normal}
   .math .op{font-style:normal; margin:0 .26em}
   .math .pn{font-style:normal; margin:0 .02em}
-  .math sub,.math sup{font-style:italic; font-size:.7em; line-height:0}
-  .math sup{vertical-align:.6em} .math sub{vertical-align:-.28em}
+  .math sub,.math sup{font-style:italic; font-size:.72em}
+  .math sup{vertical-align:super} .math sub{vertical-align:sub}
   .math .sp{display:inline-block;width:.16em} .math .sp2{display:inline-block;width:.5em}
-  .math .bar{position:relative;display:inline-block;padding-top:.06em}
+  .math .bar{position:relative;display:inline-block;padding-top:.08em}
   .math .bar::after{content:"";position:absolute;left:.02em;right:.02em;top:0;border-top:1.2px solid currentColor}
-  .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 .16em}
-  .frac>.num{padding:0 .35em}
-  .frac>.den{padding:.08em .35em 0;border-top:1.4px solid currentColor}
-  .sqrt{display:inline-flex;align-items:center;vertical-align:middle}
-  .sqrt::before{content:"\221A";font-style:normal;font-size:2.1em;line-height:.62;margin-right:-.05em;transform:translateY(-.02em)}
-  .sqrt>.rad{border-top:1.6px solid currentColor;padding:.14em .3em 0 .1em}
+  .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 .18em}
+  .frac>.fnum,.frac>.fden{padding:0 .4em;line-height:1.15}
+  .frac>.fden{padding-top:.1em;border-top:1.4px solid currentColor}
+  .sqrt{display:inline-flex;align-items:stretch;vertical-align:middle}
+  .sqrt>.rsign{flex:0 0 auto;width:.66em;align-self:stretch}
+  .sqrt>.rsign svg{display:block;width:100%;height:100%;overflow:visible}
+  .sqrt>.rad{border-top:1.5px solid currentColor;padding:.14em .32em 0 .14em;display:inline-flex;align-items:center}
 
   /* Masthead */
   header.masthead{max-width:1180px;margin:0 auto;padding:44px 4px 8px}
@@ -187,9 +188,9 @@ function M(tex){
     switch(name){
       case 'dfrac': case 'frac': case 'tfrac':{
         const a=arg(),b=arg();
-        return '<span class="frac"><span class="num">'+a+'</span><span class="den">'+b+'</span></span>';
+        return '<span class="frac"><span class="fnum">'+a+'</span><span class="fden">'+b+'</span></span>';
       }
-      case 'sqrt': return '<span class="sqrt"><span class="rad">'+arg()+'</span></span>';
+      case 'sqrt': return '<span class="sqrt"><span class="rsign"><svg viewBox="0 0 12 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0.5,14 L3,11 L6,23 L11,1 L12,1" fill="none" stroke="currentColor" stroke-width="1.4" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg></span><span class="rad">'+arg()+'</span></span>';
       case 'text': return '<span class="txt">'+arg()+'</span>';
       case 'bar': return '<span class="bar">'+arg()+'</span>';
       case 'left':{ const d=s[i]; i++; return d==='.'?'':emit(d); }
@@ -223,7 +224,7 @@ const CARDS=[
    sy:[["v_y","final velocity in the vertical (y) direction"],["u_y","starting velocity in the vertical (y) direction"],["g","acceleration due to gravity; near Earth's surface g = −9.8 m s⁻²"]]},
   {t:"motion",sub:"Projectiles",f:"s_y = u_y t + \\tfrac{1}{2} g t^2",d:"Final vertical displacement",
    sy:[["s_y","displacement in the vertical (y) direction"],["u_y","initial vertical velocity"],["g","acceleration due to gravity"],["t","time (s)"]]},
-  {t:"motion",sub:"Projectiles",f:"v_y^{\\,2} = 2 g s_y + u_y^{\\,2}",d:"Final vertical velocity (also v_y² = u_y² + 2g s_y)",
+  {t:"motion",sub:"Projectiles",f:"v_y^2 = 2 g s_y + u_y^2",d:"Final vertical velocity (also v_y² = u_y² + 2g s_y)",
    sy:[["v_y","final vertical velocity"],["u_y","initial vertical velocity"],["s_y","vertical displacement"],["g","acceleration due to gravity"]]},
   {t:"motion",sub:"Projectiles",f:"v_x = u_x",d:"Final horizontal velocity equals the initial horizontal velocity",
    sy:[["v_x","final velocity in the horizontal (x) direction"],["u_x","starting velocity in the horizontal (x) direction"]]},
@@ -245,7 +246,7 @@ const CARDS=[
    sy:[["F_g","gravitational force between two objects (N)"],["G","gravitational constant (see table)"],["M,\\,m","masses of the two objects (kg)"],["r","radial distance between objects (m)"]]},
   {t:"motion",sub:"Orbits",f:"g = \\dfrac{F}{m} = \\dfrac{GM}{r^2}",d:"Gravitational field strength, by force on a mass or by distance",
    sy:[["g","field strength (N kg⁻¹ or m s⁻²)"],["m","mass of object in the field (kg)"],["M","mass of the astronomical body (kg)"],["G","gravitational constant"],["r","radial distance from centre of body (m)"]]},
-  {t:"motion",sub:"Orbits",f:"\\dfrac{T_a^{\\,2}}{r_a^{\\,3}} = \\dfrac{T_b^{\\,2}}{r_b^{\\,3}} = \\dfrac{4\\pi^2}{GM}",d:"Law of periods — Kepler’s ratio T²/r³ is constant for one central star",
+  {t:"motion",sub:"Orbits",f:"\\dfrac{T_a^2}{r_a^3} = \\dfrac{T_b^2}{r_b^3} = \\dfrac{4\\pi^2}{GM}",d:"Law of periods — Kepler’s ratio T²/r³ is constant for one central star",
    sy:[["T","period of revolution about the central star (s)"],["r","radius of orbit (m)"],["M","mass of central star (kg)"],["G","gravitational constant"],["a,\\,b","subscripts denoting the two bodies"]]},
 
   {t:"em",sub:"Electrostatics",f:"F = \\dfrac{1}{4\\pi\\varepsilon_0}\\dfrac{Qq}{r^2} = \\dfrac{kQq}{r^2}",d:"Coulomb’s law — force between two charges r apart",
@@ -294,7 +295,7 @@ const CARDS=[
    sy:[["n","atomic energy level"],["\\lambda","electron (Bohr) standing-wave wavelength (m)"],["r","Bohr radius of the electron orbit (m)"],["2\\pi r","circumference of the electron orbit (m)"]]},
   {t:"quantum",sub:"Bohr atom",f:"mvr = \\dfrac{nh}{2\\pi}",d:"Quantised angular momentum of an electron in an atom",
    sy:[["mvr","angular momentum of the electron, symbol L (kg m² s⁻¹)"],["m","mass of the electron (kg)"],["v","velocity of the electron (m s⁻¹)"],["n","atomic energy level"],["h","Planck’s constant"]]},
-  {t:"quantum",sub:"Spectra",f:"\\dfrac{1}{\\lambda} = R\\left(\\dfrac{1}{n_f^{\\,2}} - \\dfrac{1}{n_i^{\\,2}}\\right)",d:"Rydberg’s equation for the hydrogen spectrum",
+  {t:"quantum",sub:"Spectra",f:"\\dfrac{1}{\\lambda} = R\\left(\\dfrac{1}{n_f^2} - \\dfrac{1}{n_i^2}\\right)",d:"Rydberg’s equation for the hydrogen spectrum",
    sy:[["\\lambda","wavelength of the emitted light (m)"],["R","Rydberg’s constant (see table)"],["n_f","final energy level"],["n_i","initial energy level"]]},
   {t:"quantum",sub:"Photoelectric",f:"W = hf_0",d:"Work function and threshold frequency",
    sy:[["W","work function of the electron (J)"],["h","Planck’s constant"],["f_0","threshold frequency (Hz)"]]},
