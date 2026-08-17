@@ -100,6 +100,16 @@
 
   .count{max-width:1180px;margin:26px auto 0;color:var(--muted);font-size:12.5px;letter-spacing:.02em}
 
+  /* Not-in-booklet highlight */
+  .card.bonus .face{box-shadow:var(--shadow),inset 0 0 0 2px #C8951B}
+  .nb{display:inline-flex;align-items:center;gap:4px;font:700 8.5px/1 "Inter";letter-spacing:.07em;
+    text-transform:uppercase;color:#7A560C;background:#F7E6B8;border:1px solid #E3C77E;padding:4px 8px;border-radius:999px;white-space:nowrap}
+  .nb .star{color:#C8951B;font-size:10px;line-height:0}
+  .nbnote{margin-top:7px;font:600 9.5px/1.25 "Inter";color:#fff;background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.4);padding:4px 8px;border-radius:7px;display:inline-block}
+  .chip.nbchip{--c:#C8951B}
+  .chip.nbchip .dot{background:#C8951B;border-radius:0;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+
   /* Print — duplex, backs row-mirrored */
   .printroot{position:fixed;left:-10000px;top:0;width:190mm}
   @media print{
@@ -123,6 +133,9 @@
     .pb .psy{padding:2mm 3mm;display:flex;flex-direction:column;gap:.9mm;overflow:hidden}
     .pb .prow{font:400 6.6pt/1.25 "Inter";color:#232c38}
     .pb .prow b .math{font-size:7pt;color:var(--c)}
+    .pcard.pbonus{border-color:#C8951B;border-width:.6mm}
+    .pf .pnb{font:700 5.2pt/1 "Inter";letter-spacing:.05em;text-transform:uppercase;color:#7A560C;background:#F7E6B8;border:.3mm solid #E3C77E;border-radius:1.4mm;padding:.6mm 1.6mm;margin-bottom:.6mm}
+    .pb .pnbn{margin-top:.8mm;font:700 5.4pt/1.15 "Inter";color:#fff;background:rgba(255,255,255,.2);border:.2mm solid rgba(255,255,255,.5);border-radius:1mm;padding:.5mm 1.4mm;display:inline-block}
   }
 </style>
 </head>
@@ -230,9 +243,9 @@ const CARDS=[
    sy:[["v_x","final velocity in the horizontal (x) direction"],["u_x","starting velocity in the horizontal (x) direction"]]},
   {t:"motion",sub:"Projectiles",f:"s_x = u_x t",d:"Final horizontal displacement",
    sy:[["s_x","horizontal displacement, also called the ‘horizontal range’"],["u_x","initial horizontal velocity"],["t","time (s)"]]},
-  {t:"motion",sub:"Projectiles",f:"u_y = u\\sin\\theta",d:"Vertical component of launch velocity (not in formula book)",
+  {t:"motion",sub:"Projectiles",nb:true,f:"u_y = u\\sin\\theta",d:"Vertical component of the launch velocity",
    sy:[["u_y","vertical component of initial velocity"],["u","launch speed"],["\\theta","launch angle above horizontal"]]},
-  {t:"motion",sub:"Projectiles",f:"u_x = u\\cos\\theta",d:"Horizontal component of launch velocity (not in formula book)",
+  {t:"motion",sub:"Projectiles",nb:true,f:"u_x = u\\cos\\theta",d:"Horizontal component of the launch velocity",
    sy:[["u_x","horizontal component of initial velocity"],["u","launch speed"],["\\theta","launch angle above horizontal"]]},
   {t:"motion",sub:"Inclined planes",f:"F_g = mg",d:"Gravitational force — the weight (F_W in Unit 2)",
    sy:[["F_g","gravitational force (weight) in newtons (N)"],["m","mass of object in the field in kilograms (kg)"],["g","gravitational field strength (N kg⁻¹) or accel. due to gravity (m s⁻²)"]]},
@@ -315,20 +328,22 @@ const fitEls=[];
 CARDS.forEach((c,idx)=>{
   const tp=TOPIC[c.t],col=C[c.t],n=pad(idx+1);
   const card=document.createElement('button');
-  card.className='card'; card.dataset.topic=c.t; card.style.setProperty('--c',col);
-  card.setAttribute('aria-label',`Card ${idx+1}: ${c.d}. Activate to flip.`);
+  card.className='card'+(c.nb?' bonus':''); card.dataset.topic=c.t; card.dataset.nb=c.nb?'1':''; card.style.setProperty('--c',col);
+  card.setAttribute('aria-label',`Card ${idx+1}: ${c.d}${c.nb?' (not in the QCAA booklet)':''}. Activate to flip.`);
   const rows=c.sy.map(([s,m])=>`<div class="sym"><span class="s">${M(s)}</span><span>${m}</span></div>`).join('');
+  const badge=c.nb?'<span class="nb"><span class="star">★</span>Not in F&amp;DB</span>':'';
+  const note=c.nb?'<div class="nbnote">★ Not in the Formula &amp; Data Book — memorise this one</div>':'';
   card.innerHTML=`
     <div class="inner">
       <div class="face front">
         <span class="spine"></span>
-        <div class="top"><span class="tag">${tp.name}</span></div>
+        <div class="top"><span class="tag">${tp.name}</span>${badge}</div>
         <div class="formula"><span class="fit">${M(c.f)}</span></div>
         <div class="foot"><span class="num">${n}</span></div>
       </div>
       <div class="face back">
         <span class="spine"></span>
-        <div class="head"><div class="k">${tp.name}</div><div class="desc">${c.d}</div></div>
+        <div class="head"><div class="k">${tp.name}</div><div class="desc">${c.d}</div>${note}</div>
         <div class="syms">${rows}</div>
         <span class="num">${n}</span>
       </div>
@@ -362,13 +377,22 @@ Object.entries(TOPIC).forEach(([key,tp])=>{
   });
   chips.appendChild(b);
 });
+const nbChip=document.createElement('button');
+nbChip.className='chip nbchip'; nbChip.setAttribute('aria-pressed','false');
+nbChip.innerHTML='<span class="dot"></span>Not in booklet';
+nbChip.addEventListener('click',()=>{
+  state.bonusOnly=nbChip.getAttribute('aria-pressed')!=='true';
+  nbChip.setAttribute('aria-pressed',String(state.bonusOnly));
+  applyFilter();
+});
+chips.appendChild(nbChip);
 function applyFilter(){
   let shown=0;
   document.querySelectorAll('.card').forEach(c=>{
-    const vis=state.topics.has(c.dataset.topic);
+    const vis=state.topics.has(c.dataset.topic) && (!state.bonusOnly || c.dataset.nb==='1');
     c.style.display=vis?'':'none'; if(vis)shown++;
   });
-  document.getElementById('count').textContent=`${shown} of ${CARDS.length} cards shown · click a card to flip · use “Print deck” for double-sided cards to cut out`;
+  document.getElementById('count').textContent=`${shown} of ${CARDS.length} cards shown · ★ marks the 2 formulas not printed in the QCAA Formula & Data Book · click a card to flip · use “Print deck” for double-sided cards`;
   requestAnimationFrame(fitAll);
 }
 
@@ -395,8 +419,9 @@ function buildPrint(){
     const fs=document.createElement('div'); fs.className='psheet';
     page.forEach((c,idx)=>{
       const n=pad(p+idx+1);
-      const el=document.createElement('div'); el.className='pcard'; el.style.setProperty('--c',C[c.t]);
-      el.innerHTML=`<span class="pspine"></span><div class="pf"><div class="ptag">${TOPIC[c.t].name}</div><div class="pfx"><span class="fit">${M(c.f)}</span></div><div class="pnum">${n}</div></div>`;
+      const el=document.createElement('div'); el.className='pcard'+(c.nb?' pbonus':''); el.style.setProperty('--c',C[c.t]);
+      const pnb=c.nb?'<div class="pnb">★ Not in F&amp;DB</div>':'';
+      el.innerHTML=`<span class="pspine"></span><div class="pf"><div class="ptag">${TOPIC[c.t].name}</div>${pnb}<div class="pfx"><span class="fit">${M(c.f)}</span></div><div class="pnum">${n}</div></div>`;
       fs.appendChild(el); printFits.push(el.querySelector('.pfx'));
     });
     root.appendChild(fs);
@@ -412,10 +437,12 @@ function buildPrint(){
     grid.forEach(o=>{
       const el=document.createElement('div'); el.className='pcard';
       if(!o.c){ el.style.border='none'; bs.appendChild(el); return; }
+      if(o.c.nb) el.classList.add('pbonus');
       el.style.setProperty('--c',C[o.c.t]);
       const n=pad(o.gi+1);
       const rows=o.c.sy.map(([s,m])=>`<div class="prow"><b>${M(s)}</b> ${m}</div>`).join('');
-      el.innerHTML=`<span class="pspine"></span><div class="pb"><div class="phead"><div class="pk">${TOPIC[o.c.t].name} · ${n}</div>${o.c.d}</div><div class="psy">${rows}</div></div>`;
+      const pnbn=o.c.nb?'<div class="pnbn">★ Not in F&amp;DB — memorise</div>':'';
+      el.innerHTML=`<span class="pspine"></span><div class="pb"><div class="phead"><div class="pk">${TOPIC[o.c.t].name} · ${n}</div>${o.c.d}${pnbn}</div><div class="psy">${rows}</div></div>`;
       bs.appendChild(el);
     });
     root.appendChild(bs);
